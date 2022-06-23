@@ -1,0 +1,7 @@
+#!/home/ritaalamino/workspace/observatorio/curso_data_lake/.env/bin/python3
+import json_merge_patch.cli
+json_merge_patch.cli.main()
+
+
+
+
