@@ -1,12 +1,11 @@
-from airflow.models import BaseOperator, DAG, TaskInstance
-from airflow.utils.decorators import apply_defaults
-from pathlib import Path
-import sys
-sys.path.append("/home/ritaalamino/workspace/observatorio/curso_data_lake/AIRFLOW/plugins")
-
-from hooks.twitter_hook import TwitterHook
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+from pathlib import Path
+from os.path import join
+
+from airflow.models import DAG, BaseOperator, TaskInstance
+from airflow.utils.decorators import apply_defaults
+from hooks.twitter_hook import TwitterHook
 
 class TwitterOperator(BaseOperator):
 
@@ -44,7 +43,8 @@ class TwitterOperator(BaseOperator):
             start_time = self.start_time,
             end_time = self.end_time
         )
-        self.create_parent_folder
+        self.create_parent_folder()
+        
         with open(self.file_path, "w") as output_file:
             for pg in hook.run():
                 # salva json em um arquivo
@@ -55,9 +55,14 @@ if __name__ == "__main__":
     with DAG(dag_id="TwitterTest", start_date=datetime.now()) as dag:
         to = TwitterOperator(
             query="Semantic Similarity",
-            file_path="NLPTask_{{ ds_nodash }}.json",
+            file_path=join(
+                "/home/ritaalamino/workspace/observatorio/curso_data_lake/AIRFLOW/datalake",
+                "twitter_nlp",
+                "extract_date={{ ds }}",
+                "NLPTask_{{ ds_nodash }}.json"
+            ),
             task_id="test_run"
         )
 
-        ti = TaskInstance(task=to, execution_date=datetime.now())
+        ti = TaskInstance(task=to, execution_date=datetime.now() - timedelta(days=2))
         ti.run()
